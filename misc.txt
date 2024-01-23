@@ -1,0 +1,39 @@
+name: MRE ration pack, price: 23261, energy: 70, hydration: 0
+name: Pack of oat flakes, price: 23025, energy: 40, hydration: -13
+name: Can of humpback salmon, price: 14441, energy: 50, hydration: -5
+name: Emelya rye croutons, price: 8948, energy: 10, hydration: -10
+name: Salty Dog beef sausage, price: 17995, energy: 50, hydration: -5
+name: Can of pacific saury, price: 12203, energy: 48, hydration: -2
+name: Army crackers, price: 13930, energy: 10, hydration: -5
+name: Jar of DevilDog mayo, price: 11176, energy: 100, hydration: -99
+name: Can of beef stew (Small), price: 11444, energy: 45, hydration: -5
+name: Can of squash spread, price: 23281, energy: 40, hydration: 0
+name: Can of sprats, price: 13907, energy: 55, hydration: -5
+name: Can of condensed milk, price: 15905, energy: 75, hydration: -65
+name: Pack of sugar, price: 29155, energy: 70, hydration: -45
+name: Slickers chocolate bar, price: 10060, energy: 30, hydration: -15
+name: Can of herring, price: 23109, energy: 47, hydration: -3
+name: Can of green peas, price: 14841, energy: 35, hydration: 5
+name: Rye croutons, price: 18442, energy: 20, hydration: -10
+name: Can of beef stew (Large), price: 22296, energy: 50, hydration: -5
+name: Alyonka chocolate bar, price: 22981, energy: 35, hydration: -15
+name: Iskra ration pack, price: 23087, energy: 80, hydration: 0
+name: Pack of milk, price: 21009, energy: 20, hydration: 30
+name: Can of Ice Green tea, price: 6023, energy: 0, hydration: 15
+name: Can of Max Energy energy drink, price: 11935, energy: 12, hydration: 20
+name: Can of Hot Rod energy drink, price: 11657, energy: 10, hydration: 20
+name: Canister with purified water, price: 189065, energy: 25, hydration: 100
+name: Pack of Russian Army pineapple juice, price: 10661, energy: 8, hydration: 30
+name: Bottle of Pevko Light beer, price: 23745, energy: 10, hydration: 40
+name: Bottle of Norvinskiy Yadreniy premium kvass (0.6L), price: 25027, energy: 15, hydration: 65
+name: Bottle of Fierce Hatchling moonshine, price: 265564, energy: 20, hydration: -10
+name: Aquamari water bottle with filter, price: 25756, energy: 20, hydration: 100
+name: Bottle of Dan Jackiel whiskey, price: 36656, energy: 10, hydration: -35
+name: Emergency Water Ration, price: 18469, energy: 5, hydration: 50
+name: Bottle of water (0.6L), price: 13615, energy: 0, hydration: 60
+name: Can of RatCola soda, price: 17072, energy: 20, hydration: 20
+name: Pack of apple juice, price: 8019, energy: 5, hydration: 25
+name: Pack of Grand juice, price: 10011, energy: 6, hydration: 30
+name: Bottle of Tarkovskaya vodka, price: 23784, energy: 0, hydration: -50
+name: Can of TarCola soda, price: 24377, energy: 5, hydration: 15
+name: Pack of Vita juice, price: 16577, energy: 8, hydration: 28
