@@ -1,14 +1,20 @@
-import requests
-from bs4 import BeautifulSoup
+from flask import Flask, request, jsonify
+
+app = Flask(__name__)
+
+@app.route("/provisions_calculator_api/")
+def provisions_calculator_api():
+    query = request.args.to_dict()
+    query = {k: int(v) for k, v in query.items()}
+    current_energy = query['current_energy']
+    current_hydration = query['current_hydration']
+    energy_difference = query['energy_difference']
+    hydration_difference = query['hydration_difference']
+    
 
 
-food_url = 'https://tarkov-market.com/tag/food'
-drink_url = 'https://tarkov-market.com/tag/drinks'
-# URL to be scraped
-food_page = requests.get(food_url)
-drink_page = requests.get(drink_url)
 
 
-food_soup = BeautifulSoup(food_page.content, 'html.parser')
-drink_soup = BeautifulSoup(drink_page.content, 'html.parser')
+if __name__ == '__main__':
+    app.run(debug=True)
 

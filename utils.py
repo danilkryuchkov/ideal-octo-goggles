@@ -1,4 +1,4 @@
-def best_to_consume(current_energy, current_hydration, goal_energy, goal_hydration, reference_dict):
+def best_to_consume1(current_energy, current_hydration, goal_energy, goal_hydration, reference_dict):
     """
     Returns the best item to consume based on the current energy and hydration levels.
     """
@@ -61,6 +61,108 @@ def best_to_consume(current_energy, current_hydration, goal_energy, goal_hydrati
     print(f"final energy: {current_energy + sum([reference_dict[provision_name][1] for provision_name in dp_provisions_arr[energy_difference][hydration_difference]])}")
     print(f"final hydration: {current_hydration + sum([reference_dict[provision_name][2] for provision_name in dp_provisions_arr[energy_difference][hydration_difference]])}")
 
-        
+def monolyth_scraper1():
+    import requests
+    from bs4 import BeautifulSoup
+    import re
+
+    food_url = 'https://tarkov-market.com/tag/food'
+    drink_url = 'https://tarkov-market.com/tag/drinks'
+    # URL to be scraped
+    food_page = requests.get(food_url)
+    drink_page = requests.get(drink_url)
 
 
+    food_soup = BeautifulSoup(food_page.content, 'html.parser')
+    drink_soup = BeautifulSoup(drink_page.content, 'html.parser')
+    
+    food_table_list_div = food_soup.find('div', class_='table-list')
+    drink_table_list_div = drink_soup.find('div', class_='table-list')
+
+    provisions_price_dict = {}
+
+    all_food_rows = food_table_list_div.find_all('div', class_='row')
+    all_drink_rows = drink_table_list_div.find_all('div', class_='row')
+
+        # Iterate over each child div
+    for child_div in all_food_rows[1:]:
+        # Do something with each child div
+        #print(child_div.prettify())
+        price = child_div.find('span', class_='price-main')
+        price_num = re.sub(r'\D', '', price.text)
+        print(price_num)
+        print(price.text)
+        name = child_div.find('span', class_='name').text.replace('"', '')
+        print(name)
+        print('-------------------')
+        if name == 'Bottle of Tarkovskaya vodka (bad)':
+            continue
+        provisions_price_dict[name] = int(price_num)
+
+    for child_div in all_drink_rows[1:]:
+        # Do something with each child div
+        #print(child_div.prettify())
+        price = child_div.find('span', class_='price-main')
+        price_num = re.sub(r'\D', '', price.text)
+        print(price_num)
+        print(price.text)
+        name = child_div.find('span', class_='name').text.replace('"', '')
+        print(name)
+        print('-------------------')
+        if name == 'Bottle of Tarkovskaya vodka (bad)':
+            continue
+        provisions_price_dict[name] = int(price_num)
+
+    from items_dict import items_dict
+
+    full_dict = {}
+    for key, price_24h_avg in provisions_price_dict.items():
+        energy, hydration = items_dict[key]
+        full_dict[key] = [price_24h_avg, energy, hydration]
+        print(f"name: {key}, price: {price_24h_avg}, energy: {energy}, hydration: {hydration}")
+
+def better_scraper():
+    base_url = 'https://tarkov-market.com/item/',
+    all_provision_urls = [
+'Green_Ice',
+'Squash_spread',
+'Can_of_green_peas',
+'Rye_croutons',
+'Pack_of_oat_flakes',
+'TarCola',
+'Emelya_rye_croutons',
+'Pack_of_milk',
+'Can_of_pacific_saury',
+'Condensed_milk',
+'Can_of_sprats',
+'Can_of_delicious_beef_stew',
+'can_of_ratcola',
+'Jar_of_DevilDog_mayo',
+'Can_of_beef_stew',
+'fierce_hatchling_moonshine',
+'Iskra_lunch_box',
+'Grand_juice',
+'salty_dog_beef_sausage',
+'premium_kvass_norvinskiy_yadreniy_0.6l_bottle',
+'Russian_Army_pineapple_juice',
+'Bottle_of_vodka_Tarkovskaya',
+'Pack_of_sugar',
+'Hot_Rod',
+'Alyonka_chocolate_bar',
+'Water_bottle_with_a_filter_Aquamari',
+'Bottle_of_Dan_Jackiel_Whiskey',
+'bottle_of_beer_pevko_light',
+'Apple_juice',
+'Vita_juice',
+'Can_of_herring',
+'0.6L_water_bottle',
+'pack_of_instant_noodles',
+'Humpback_salmon',
+'MRE_lunch_box',
+'Max_energy',
+'purified_water',
+'Slickers_bar',
+'Army_Crackers',
+'pack_of_tarker_dried_meat',
+'emergency_water_ration'
+]
