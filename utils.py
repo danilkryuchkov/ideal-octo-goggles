@@ -132,3 +132,78 @@ def best_to_consume_df(current_energy, current_hydration, goal_energy, goal_hydr
     }
     return response
 
+def best_to_consume_dict(current_energy, current_hydration, goal_energy, goal_hydration, df):
+    """
+    Returns the best item to consume based on the current energy and hydration levels.
+    """
+
+    #set up the re-used variables and the DP array
+    energy_difference = goal_energy - current_energy
+    hydration_difference = goal_hydration - current_hydration
+    
+    storage_dict = {(0,0): [0,[]]}
+
+    contenders_dict = {}
+
+    valid_start_points = [(0,0)]
+
+
+
+    while valid_start_points:
+        current_start_energy, current_start_hydration = valid_start_points.pop(0)
+        print(f"trying starting point (e,h): {current_start_energy}, {current_start_hydration}")
+
+        if (current_start_energy >= energy_difference and current_start_hydration >= hydration_difference) or (current_start_energy < -50 and current_start_hydration < -50):
+            #print(f"  starting point too far, removing (e,h): {start_energy_row}, {start_hydration_column}")
+            continue
+        
+        for index, row in df.iterrows():
+            price = int(row['price'])
+            energy = int(row['energy'])
+            hydration = int(row['hydration'])
+            name = row['name']
+        
+            #print(f"  starting point valid, jumping from (e,h): {start_energy_row}, {start_hydration_column}")
+            current_result_energy= current_start_energy + energy
+            current_result_hydration = current_start_hydration + hydration
+
+            
+            curr_combo_price = storage_dict[(current_start_energy, current_start_hydration)][0] + price
+            curr_combo_names = storage_dict[(current_start_energy, current_start_hydration)][1] + [name]
+
+            if (current_result_energy, current_result_hydration) not in storage_dict:
+                storage_dict[(current_result_energy, current_result_hydration)] = [curr_combo_price, [name]]
+                if (current_result_energy >= energy_difference and current_result_hydration >= hydration_difference):
+                    contenders_dict[(current_result_energy, current_result_hydration)] = storage_dict[(current_result_energy, current_result_hydration)]
+                    continue
+                elif (current_result_energy > -50 and current_result_hydration > -50 and current_result_energy < goal_energy + 50 and current_result_hydration < goal_hydration + 50):
+                    valid_start_points.append((current_result_energy, current_result_hydration))
+                    continue
+            else:
+                if storage_dict[(current_result_energy, current_result_hydration)][0] > curr_combo_price:
+                    storage_dict[(current_result_energy, current_result_hydration)] = [curr_combo_price, curr_combo_names]
+                    #curr_combo_provisions = storage_dict[(current_result_energy, current_result_hydration)][1] + [name]
+                    if (current_result_energy >= energy_difference and current_result_hydration >= hydration_difference):
+                        contenders_dict[(current_result_energy, current_result_hydration)] = storage_dict[(current_result_energy, current_result_hydration)]
+                        continue
+                    elif (current_result_energy > -50 and current_result_hydration > -50 and current_result_energy < goal_energy + 50 and current_result_hydration < goal_hydration + 50):
+                        valid_start_points.append((current_result_energy, current_result_hydration))
+                        continue
+
+    min_price = float('inf')
+    min_price_key = None
+    for key, value in contenders_dict.items():
+        if value[0] < min_price:
+            min_price = value[0]
+            min_price_key = key
+    
+    provisions = [{col: row[col] for col in df.columns} for index, row in df.iterrows() if row['name'] in contenders_dict[min_price_key][1]]
+    
+    response = {
+        'min_price': min_price,
+        'provisions': provisions,
+        'final_energy': current_energy + min_price_key[0],
+        'final_hydration': current_hydration + min_price_key[1]
+    }
+    return response
+
