@@ -68,68 +68,70 @@ def best_to_consume_df(current_energy, current_hydration, goal_energy, goal_hydr
     """
     Returns the best item to consume based on the current energy and hydration levels.
     """
-
-    #set up the re-used variables and the DP array
-    energy_difference = goal_energy - current_energy
-    hydration_difference = goal_hydration - current_hydration
-    total_energy_rows = energy_difference + 100
-    total_hydration_columns = hydration_difference + 100
-
-
-    dp_arr = [[float('inf') for i in range(total_hydration_columns)] for j in range(total_energy_rows)]
-    dp_arr[0][0] = 0
-    dp_provisions_arr = [[[] for i in range(total_hydration_columns)] for j in range(total_energy_rows)]
-    valid_start_points = [(0,0)]
+    try:
+        #set up the re-used variables and the DP array
+        energy_difference = goal_energy - current_energy
+        hydration_difference = goal_hydration - current_hydration
+        total_energy_rows = energy_difference + 100
+        total_hydration_columns = hydration_difference + 100
 
 
-    while valid_start_points:
-        start_energy_row, start_hydration_column = valid_start_points.pop(0)
-        #print(f"trying starting point (e,h): {start_energy_row}, {start_hydration_column}")
+        dp_arr = [[float('inf') for i in range(total_hydration_columns)] for j in range(total_energy_rows)]
+        dp_arr[0][0] = 0
+        dp_provisions_arr = [[[] for i in range(total_hydration_columns)] for j in range(total_energy_rows)]
+        valid_start_points = [(0,0)]
 
-        if start_energy_row >= energy_difference and start_hydration_column >= hydration_difference:
-            #print(f"  starting point too far, removing (e,h): {start_energy_row}, {start_hydration_column}")
-            continue
-        
-        for index, row in df.iterrows():
-            price = int(row['price'])
-            energy = int(row['energy'])
-            hydration = int(row['hydration'])
-            name = row['name']
-        
-            #print(f"  starting point valid, jumping from (e,h): {start_energy_row}, {start_hydration_column}")
-            result_energy_row = start_energy_row + energy
-            result_hydration_column = start_hydration_column + hydration
 
-            #check for out of bounds/negative effects
-            if result_energy_row >= total_energy_rows or result_hydration_column >= total_hydration_columns or result_energy_row < 0 or result_hydration_column < 0:
-                #print(f"  provision lands out of bounds, skipping (e,h): {result_energy_row}, {result_hydration_column}. name: {name}, price: {price}, energy: {energy}, hydration: {hydration}")
+        while valid_start_points:
+            start_energy_row, start_hydration_column = valid_start_points.pop(0)
+            #print(f"trying starting point (e,h): {start_energy_row}, {start_hydration_column}")
+
+            if start_energy_row >= energy_difference and start_hydration_column >= hydration_difference:
+                #print(f"  starting point too far, removing (e,h): {start_energy_row}, {start_hydration_column}")
                 continue
             
-            curr_combo_price = dp_arr[start_energy_row][start_hydration_column] + price
-            if dp_arr[result_energy_row][result_hydration_column] > curr_combo_price:
-                dp_arr[result_energy_row][result_hydration_column] = curr_combo_price
-                curr_combo_provisions = dp_provisions_arr[start_energy_row][start_hydration_column] + [name]
-                dp_provisions_arr[result_energy_row][result_hydration_column] = curr_combo_provisions
+            for index, row in df.iterrows():
+                price = int(row['price'])
+                energy = int(row['energy'])
+                hydration = int(row['hydration'])
+                name = row['name']
+            
+                #print(f"  starting point valid, jumping from (e,h): {start_energy_row}, {start_hydration_column}")
+                result_energy_row = start_energy_row + energy
+                result_hydration_column = start_hydration_column + hydration
 
-                valid_start_points.append((result_energy_row, result_hydration_column))
+                #check for out of bounds/negative effects
+                if result_energy_row >= total_energy_rows or result_hydration_column >= total_hydration_columns or result_energy_row < 0 or result_hydration_column < 0:
+                    #print(f"  provision lands out of bounds, skipping (e,h): {result_energy_row}, {result_hydration_column}. name: {name}, price: {price}, energy: {energy}, hydration: {hydration}")
+                    continue
+                
+                curr_combo_price = dp_arr[start_energy_row][start_hydration_column] + price
+                if dp_arr[result_energy_row][result_hydration_column] > curr_combo_price:
+                    dp_arr[result_energy_row][result_hydration_column] = curr_combo_price
+                    curr_combo_provisions = dp_provisions_arr[start_energy_row][start_hydration_column] + [name]
+                    dp_provisions_arr[result_energy_row][result_hydration_column] = curr_combo_provisions
 
-                for energy_row in range(0, result_energy_row):
-                    for hydration_column in range(0, result_hydration_column):
-                        if energy_row < start_energy_row and hydration_column < start_hydration_column:
-                            continue
-                        if dp_arr[energy_row][hydration_column] > curr_combo_price:
-                            dp_arr[energy_row][hydration_column] = curr_combo_price
-                            dp_provisions_arr[energy_row][hydration_column] = curr_combo_provisions
-    
-    
-    provisions = [{col: row[col] for col in df.columns} for index, row in df.iterrows() if row['name'] in dp_provisions_arr[energy_difference][hydration_difference]]
-    
-    response = {
-        'min_price': dp_arr[energy_difference][hydration_difference],
-        'provisions': provisions,
-        'final_energy': current_energy + sum([provision['energy'] for provision in provisions]),
-        'final_hydration': current_hydration + sum([provision['hydration'] for provision in provisions])
-    }
+                    valid_start_points.append((result_energy_row, result_hydration_column))
+
+                    for energy_row in range(0, result_energy_row):
+                        for hydration_column in range(0, result_hydration_column):
+                            if energy_row < start_energy_row and hydration_column < start_hydration_column:
+                                continue
+                            if dp_arr[energy_row][hydration_column] > curr_combo_price:
+                                dp_arr[energy_row][hydration_column] = curr_combo_price
+                                dp_provisions_arr[energy_row][hydration_column] = curr_combo_provisions
+        
+        
+        provisions = [{col: row[col] for col in df.columns} for index, row in df.iterrows() if row['name'] in dp_provisions_arr[energy_difference][hydration_difference]]
+        
+        response = {
+            'min_price': dp_arr[energy_difference][hydration_difference],
+            'provisions': provisions,
+            'final_energy': current_energy + sum([provision['energy'] for provision in provisions]),
+            'final_hydration': current_hydration + sum([provision['hydration'] for provision in provisions])
+        }
+    except:
+        response = "failed"
     return response
 
 def best_to_consume_dict(current_energy, current_hydration, goal_energy, goal_hydration, df):
@@ -207,3 +209,47 @@ def best_to_consume_dict(current_energy, current_hydration, goal_energy, goal_hy
     }
     return response
 
+def best_to_consume_pulp(current_energy, current_hydration, goal_energy, goal_hydration, df):
+    import pulp
+
+    # Data
+    items = []#["item1", "item2", ...]   List of item names
+    costs = {}#{"item1": cost1, "item2": cost2, ...}  # Dict of costs
+    energy = {}#{"item1": energy1, "item2": energy2, ...}  # Dict of energy values
+    hydration = {}#{"item1": hydration1, "item2": hydration2, ...}  # Dict of hydration values
+
+    for idx, row in df.iterrows():
+        #print(row)
+        #print(f'item: {row["name"]}')
+        items.append(row['name'])
+        #print(f'cost: {row["price"]}')
+        costs[row['name']] = row['price']
+        #print(f'energy: {row["energy"]}')
+        energy[row['name']] = row['energy']
+        #print(f'hydration: {row["hydration"]}')
+        hydration[row['name']] = row['hydration']
+
+    required_energy = goal_energy - current_energy  # Required energy to reach full
+    required_hydration = goal_hydration - current_hydration  # Required hydration to reach full
+
+    # Problem
+    prob = pulp.LpProblem("TarkovFoodProblem", pulp.LpMinimize)
+
+    # Variables (non-negative)
+    item_vars = pulp.LpVariable.dicts("Items", items, lowBound=0, cat='Continuous')
+
+    # Objective Function
+    prob += pulp.lpSum([costs[i] * item_vars[i] for i in items]), "Total Cost"
+
+    # Constraints
+    prob += pulp.lpSum([energy[i] * item_vars[i] for i in items]) >= required_energy, "Total Energy"
+    prob += pulp.lpSum([hydration[i] * item_vars[i] for i in items]) >= required_hydration, "Total Hydration"
+
+    # Solve the problem
+    prob.solve()
+
+    # Output results
+    for v in prob.variables():
+        if v.varValue > 0:
+            print(v.name, "=", v.varValue)
+    print("Total Cost = ", pulp.value(prob.objective))

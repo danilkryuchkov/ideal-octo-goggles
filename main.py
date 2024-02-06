@@ -12,10 +12,18 @@ def home():
 def provisions_calculator_api():
     query = request.args.to_dict()
     query = {k: int(v) for k, v in query.items()}
-    current_energy = query['current_energy']
-    current_hydration = query['current_hydration']
-    goal_energy = query['goal_energy']
-    goal_hydration = query['goal_hydration']
+    try:
+        current_energy = query['current_energy']
+        current_hydration = query['current_hydration']
+        goal_energy = query['goal_energy']
+        goal_hydration = query['goal_hydration']
+    except:
+        return "invalid paramteres"
+
+    if current_energy > 100 or current_hydration > 100 or goal_energy > 100 or goal_hydration > 100 or goal_energy < current_energy or goal_hydration < current_hydration:
+        return "invalid paramteres"
+
+    #print(current_energy, current_hydration, goal_energy, goal_hydration)
 
     df = pd.read_csv('current_items.csv')
     response = best_to_consume_df(current_energy, current_hydration, goal_energy, goal_hydration, df)
