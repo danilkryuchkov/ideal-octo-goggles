@@ -253,3 +253,46 @@ def best_to_consume_pulp(current_energy, current_hydration, goal_energy, goal_hy
         if v.varValue > 0:
             print(v.name, "=", v.varValue)
     print("Total Cost = ", pulp.value(prob.objective))
+
+def best_to_comusme_fast(start_energy, start_hydration, goal_energy, goal_hydration, df):
+    #(energy, hydration) -> [price, [provision_names]]
+    error_bound = 30
+    main_grid_dict = {}
+    main_grid_dict[(start_energy, start_hydration)] = [0,[]]
+    valid_start_points = [(start_energy, start_hydration)]
+
+    while valid_start_points:
+        current_energy, current_hydration = valid_start_points.pop(0)
+        for index, row in df.iterrows():
+            price = int(row['price'])
+            energy = int(row['energy'])
+            hydration = int(row['hydration'])
+            name = row['name']
+
+
+            result_energy = max(current_energy + energy, 0)
+            result_hydration = max(current_hydration + hydration, 0)
+
+
+
+            if (result_energy, result_hydration) not in main_grid_dict.keys():
+                if result_energy < start_energy - error_bound or result_hydration < start_hydration - error_bound or result_energy > goal_energy + error_bound or result_hydration > goal_hydration + error_bound:
+                    continue
+                main_grid_dict[(result_energy, result_hydration)] = [main_grid_dict[(current_energy, current_hydration)][0] + price, main_grid_dict[(current_energy, current_hydration)][1] + [name]]
+                valid_start_points.append((result_energy, result_hydration))
+            else:
+                if main_grid_dict[(result_energy, result_hydration)][0] > main_grid_dict[(current_energy, current_hydration)][0] + price:
+                    main_grid_dict[(result_energy, result_hydration)] = [main_grid_dict[(current_energy, current_hydration)][0] + price, main_grid_dict[(current_energy, current_hydration)][1] + [name]]
+                    if result_energy < start_energy - error_bound or result_hydration < start_hydration - error_bound or result_energy > goal_energy + error_bound or result_hydration > goal_hydration + error_bound:
+                        continue
+                    valid_start_points.append((result_energy, result_hydration))
+    
+    answer = []
+    for key in main_grid_dict.keys():
+        #print(f"key: {key}, value: {main_grid_dict[key]}")
+        if key[0] <= goal_energy + error_bound and key[1] <= goal_hydration + error_bound and key[0] >= goal_energy and key[1] >= goal_hydration:
+            print(f"not final key: {key}, value: {main_grid_dict[key]}")
+            if answer == [] or main_grid_dict[key][0] < answer[0]:
+                answer = main_grid_dict[key]
+            #answer.append(main_grid_dict[key])
+    return answer
