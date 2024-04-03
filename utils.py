@@ -1,4 +1,4 @@
-
+import heapq
 
 def best_to_consume1(current_energy, current_hydration, goal_energy, goal_hydration, reference_dict):
     """
@@ -261,8 +261,11 @@ def best_to_comusme_fast(start_energy, start_hydration, goal_energy, goal_hydrat
     main_grid_dict[(start_energy, start_hydration)] = [0,[]]
     valid_start_points = [(start_energy, start_hydration)]
 
+    current_cheapest_price = float('inf')
+
     while valid_start_points:
         current_energy, current_hydration = valid_start_points.pop(0)
+
         for index, row in df.iterrows():
             price = int(row['price'])
             energy = int(row['energy'])
@@ -276,10 +279,16 @@ def best_to_comusme_fast(start_energy, start_hydration, goal_energy, goal_hydrat
 
 
             if (result_energy, result_hydration) not in main_grid_dict.keys():
-                if result_energy < start_energy - error_bound or result_hydration < start_hydration - error_bound or result_energy > goal_energy + error_bound or result_hydration > goal_hydration + error_bound:
-                    continue
                 main_grid_dict[(result_energy, result_hydration)] = [main_grid_dict[(current_energy, current_hydration)][0] + price, main_grid_dict[(current_energy, current_hydration)][1] + [name]]
-                valid_start_points.append((result_energy, result_hydration))
+                if result_energy < start_energy - error_bound \
+                or result_hydration < start_hydration - error_bound:
+                    continue
+
+                if result_energy > goal_energy and result_hydration > goal_hydration and main_grid_dict[(result_energy, result_hydration)][0] < current_cheapest_price:
+                    current_cheapest_price = main_grid_dict[(result_energy, result_hydration)][0]
+                
+                if main_grid_dict[(result_energy, result_hydration)][0] < current_cheapest_price:
+                    valid_start_points.append((result_energy, result_hydration))
             else:
                 if main_grid_dict[(result_energy, result_hydration)][0] > main_grid_dict[(current_energy, current_hydration)][0] + price:
                     main_grid_dict[(result_energy, result_hydration)] = [main_grid_dict[(current_energy, current_hydration)][0] + price, main_grid_dict[(current_energy, current_hydration)][1] + [name]]
@@ -290,9 +299,42 @@ def best_to_comusme_fast(start_energy, start_hydration, goal_energy, goal_hydrat
     answer = []
     for key in main_grid_dict.keys():
         #print(f"key: {key}, value: {main_grid_dict[key]}")
-        if key[0] <= goal_energy + error_bound and key[1] <= goal_hydration + error_bound and key[0] >= goal_energy and key[1] >= goal_hydration:
-            print(f"not final key: {key}, value: {main_grid_dict[key]}")
+        if key[0] >= goal_energy and key[1] >= goal_hydration:
+            #print(f"not final key: {key}, value: {main_grid_dict[key]}")
             if answer == [] or main_grid_dict[key][0] < answer[0]:
                 answer = main_grid_dict[key]
             #answer.append(main_grid_dict[key])
     return answer
+
+
+def best_to_comusme_heap(start_energy, start_hydration, goal_energy, goal_hydration, df):
+    #[price, (energy, hydration), [item_name, item_name, ...]]
+    error_bound = 30 #only speeds it up
+    valid_start_points = []
+    heapq.heappush(valid_start_points, [0, (start_energy, start_hydration), []])
+
+    while valid_start_points:
+        current_price, (current_energy, current_hydration), current_items = heapq.heappop(valid_start_points)
+
+        for index, row in df.iterrows():
+            price = int(row['price'])
+            energy = int(row['energy'])
+            hydration = int(row['hydration'])
+            name = row['name']
+
+
+            result_energy = max(current_energy + energy, 0)
+            result_hydration = max(current_hydration + hydration, 0)
+            result_price = current_price + price
+            result_items = current_items + [name]
+
+            #again, can only make it faster by ignoring paths that deviate too much
+            if result_energy < start_energy - error_bound or result_hydration < start_hydration - error_bound:
+                continue
+
+            heapq.heappush(valid_start_points, [result_price, (result_energy, result_hydration), result_items])
+            print([result_price, (result_energy, result_hydration), result_items])
+        if valid_start_points[0][1][0] >= goal_energy and valid_start_points[0][1][1] >= goal_hydration:
+            break
+
+    return valid_start_points[0]
